@@ -22,6 +22,8 @@ interface Table {
 }
 
 class Graph extends Component<IProps, IState> {
+  perspectiveElement: PerspectiveViewerElement | null;
+
   constructor(props: IProps) {
     super(props);
 
@@ -30,12 +32,22 @@ class Graph extends Component<IProps, IState> {
       data: [],
       rows: [],
     };
+
+    this.perspectiveElement = null;
+  }
+
+  componentDidMount() {
+    const elem = document.getElementsByTagName('perspective-viewer')[0];
+    this.perspectiveElement = elem as unknown as PerspectiveViewerElement;
+    this.perspectiveElement.setAttribute('view', 'y_line');
+    this.perspectiveElement.setAttribute('column-pivots', '["stock"]');
+    this.perspectiveElement.setAttribute('row-pivots', '["timestamp"]');
+    this.perspectiveElement.setAttribute('columns', '["price"]');
   }
 
   componentDidUpdate() {
-    const perspectiveElement = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
-    if (perspectiveElement && this.state.rows.length > 0) {
-      perspectiveElement.load(this.state.rows);
+    if (this.perspectiveElement && this.state.rows.length > 0) {
+      this.perspectiveElement.load(this.state.rows);
     }
   }
 
@@ -54,15 +66,17 @@ class Graph extends Component<IProps, IState> {
     return priceData;
   }
 
-  getData() {
-    const data = Graph.formatData(this.props.data);
-    const rows = [];
-    for (let i = 0; i < data.length; i++) {
-      rows.push(Object.assign({}, {'index': i}, data[i]['stockPrices']));
-    }
+  getDataFromServer = () => {
+    const { data } = this.props;
+    const dataFormated = Graph.formatData(data);
+
+    const rows = dataFormated.map((value, index) => {
+      return Object.assign({}, {'index': index}, value['stockPrices']);
+    });
+
     this.setState({
-      price: data[data.length - 1].stockPrices['AAPL'],
-      data: data,
+      price: dataFormated[dataFormated.length - 1].stockPrices['AAPL'],
+      data: dataFormated,
       rows: rows,
     });
   }
@@ -80,3 +94,4 @@ class Graph extends Component<IProps, IState> {
 }
 
 export default Graph;
+
