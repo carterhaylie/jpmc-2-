@@ -8,7 +8,6 @@ import Graph from './Graph';
  * State declaration for <App />
  */
 interface IState {
-  // Define the properties for the state object here
   data: ServerRespond[],
   showGraph: boolean,
 }
@@ -37,6 +36,36 @@ class App extends Component<{}, IState> {
   }
 
   /**
+   * Called when the "Start Streaming" button is clicked.
+   * It toggles the state of `showGraph` and starts/stops the data stream.
+   */
+  handleStreamToggle() {
+    this.setState({
+      showGraph: !this.state.showGraph,
+    });
+
+    if (this.state.showGraph) {
+      DataStreamer.stop();
+    } else {
+      let intervalCount = 0;
+      const interval = setInterval(() => {
+        DataStreamer.getData((data: ServerRespond[]) => {
+          this.setState({
+            data,
+            showGraph: true,
+          });
+        });
+
+        intervalCount++;
+
+        if (intervalCount > 1000) {
+          clearInterval(interval);
+        }
+      }, 100);
+    }
+  }
+
+  /**
    * Render the App component.
    */
   render() {
@@ -57,26 +86,6 @@ class App extends Component<{}, IState> {
       </div>
     );
   }
-
-  /**
-   * Called when the "Start Streaming" button is clicked.
-   */
-  handleStreamToggle() {
-    this.setState({
-      showGraph: !this.state.showGraph,
-    });
-
-    if (this.state.showGraph) {
-      DataStreamer.stop();
-    } else {
-      DataStreamer.start((data: ServerRespond[]) => {
-        this.setState({
-          data,
-        });
-      });
-    }
-  }
 }
 
 export default App;
-
