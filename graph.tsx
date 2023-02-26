@@ -43,6 +43,7 @@ class Graph extends Component<IProps, IState> {
     this.perspectiveElement.setAttribute('column-pivots', '["stock"]');
     this.perspectiveElement.setAttribute('row-pivots', '["timestamp"]');
     this.perspectiveElement.setAttribute('columns', '["price"]');
+    this.perspectiveElement.setAttribute('aggregates', '{"price": "ohlc"}');
   }
 
   componentDidUpdate() {
@@ -94,4 +95,5 @@ class Graph extends Component<IProps, IState> {
 }
 
 export default Graph;
+
 
